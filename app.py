@@ -1,11 +1,13 @@
 import os
 import json
+from typing import Optional, List
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
+import random
 
 # Initialize the client using Environment Variables
 load_dotenv()
@@ -36,13 +38,18 @@ class QuizRequest(BaseModel):
     category: str
     sub_category: str
     difficulty: str
-    age_group: str
-    language: str = "Arabic"
+    language: Optional[str] = "English"
+    allowed_topics: List[str] = []
     num_questions: int = 10
 
 # The Core AI Engine Endpoint
 @app.post("/api/generate-quiz")
 async def generate_quiz_endpoint(request: QuizRequest):
+    quiz_seed = random.randint(100000, 999999)
+    
+    # Format the allowed topics for the prompt
+    topics_string = ", ".join(request.allowed_topics) if request.allowed_topics else "Any relevant topics within the sub-category"
+
     """
     Endpoint to generate Multiple Choice Questions (MCQs) using Google Gemini AI.
     Accepts JSON body with quiz parameters and returns generated JSON quiz.
@@ -54,16 +61,20 @@ async def generate_quiz_endpoint(request: QuizRequest):
     - Main Category: {request.category}
     - Sub-Category: {request.sub_category}
     - Difficulty Level: {request.difficulty}
-    - Target Age Group: {request.age_group}
+    - Allowed Topics: {topics_string}
     - Number of Questions: {request.num_questions}
     - Output Language: {request.language}
 
+    Quiz Generation Seed: {quiz_seed}
+
+    Use this seed only to diversify the selection of concepts and examples.
+
     Content Drafting Instructions:
-    1. Formulate the language of the questions, options, and the "explanation" style to perfectly suit the cognitive and linguistic awareness of the target age group ({request.age_group}).
-    2. The questions must be 100% scientifically accurate. Avoid fabricating undocumented information.
+    1. Formulate the language of the questions, options, and the "explanation" clearly and professionally to ensure high scientific accuracy.
+    2. The questions must be 100% scientifically accurate and focused STRICTLY on the provided 'Allowed Topics'.
     3. Do not repeat questions. Ensure each question covers a different concept within the sub-category.
     4. ⚠️ VERY IMPORTANT: Never use double quotes (") inside the texts of the questions, explanations, or options. Use single quotes (') instead to avoid breaking the JSON structure.
-    5. ⚠️ TECHNICAL TERMS RULE: Write the content in the specified Output Language ({request.language}). HOWEVER, you MUST keep all technical terms, programming keywords, data types, and scientific concepts in their original English form. DO NOT translate technical terms into Arabic (e.g., write "نستخدم الـ List" instead of "نستخدم القائمة", and use "float" instead of "عدد عشري").
+    5. Keep English ONLY if the topic itself belongs to Computer Science or Software Engineering. If the quiz topic is anything else, translate every domain-specific term into natural {request.language}.
     6. The response MUST be in strictly valid JSON format only, without any markdown formatting or additional text, matching this exact structure:
     {{
       "quiz_title": "Quiz title in {request.language} (Keep technical terms in English)",
@@ -72,7 +83,8 @@ async def generate_quiz_endpoint(request: QuizRequest):
           "question": "Question text here in {request.language} (Technical terms in English)",
           "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
           "correct_index": 0,
-          "explanation": "Detailed scientific explanation tailored for the age group in {request.language} (Technical terms in English)"
+          "explanation": "Detailed scientific explanation in {request.language} (Technical terms in English)",
+          "topic": "The exact topic name this question belongs to, chosen ONLY from the 'Allowed Topics' list"
         }}
       ]
     }}
@@ -85,7 +97,8 @@ async def generate_quiz_endpoint(request: QuizRequest):
             contents=system_prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
-                temperature=0.2, # Low temperature for more factual output
+                temperature=0.7, 
+                top_p=0.95,
             )
         )
 
@@ -106,4 +119,3 @@ async def generate_quiz_endpoint(request: QuizRequest):
     except Exception as e:
         print(f"API Connection Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
