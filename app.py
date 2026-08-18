@@ -8,7 +8,9 @@ from google import genai
 from google.genai import types
 from google.genai import errors as genai_errors
 from dotenv import load_dotenv
+import random
 
+# Initialize the client using Environment Variables
 load_dotenv()
 api_key = os.environ.get("GEMINI_API_KEY")
 if not api_key:
@@ -38,7 +40,7 @@ async def verify_internal_key(x_internal_key: str = Header(...)):
         raise HTTPException(status_code=401, detail="Invalid or missing internal API key")
 
 
-# Define the Data Model 
+# Define the Data Model for incoming requests (Data Flow Architecture)
 class QuizRequest(BaseModel):
     category: str
     sub_category: str
@@ -138,6 +140,7 @@ async def generate_quiz_endpoint(request: QuizRequest, _: None = Depends(verify_
     user_content = build_user_content(request, topics_string)
 
     try:
+        # Call the API using the selected fast model
         response = client.models.generate_content(
             model='gemini-3.5-flash-lite',
             contents=user_content,
