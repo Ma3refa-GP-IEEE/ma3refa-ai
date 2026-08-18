@@ -55,8 +55,8 @@
 
 1. **Clone the repository** to your local machine.
 ```bash
-git clone <https://github.com/Ma3refa-GP-IEEE/ma3refa-ai.git>
-cd <ma3refa-ai>
+git clone https://github.com/Ma3refa-GP-IEEE/ma3refa-ai.git
+cd ma3refa-ai
 
 ```
 
