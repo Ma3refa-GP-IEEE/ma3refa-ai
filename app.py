@@ -10,7 +10,7 @@ from google.genai import errors as genai_errors
 from dotenv import load_dotenv
 import random
 
-# Initialize the client using Environment Variables
+
 load_dotenv()
 api_key = os.environ.get("GEMINI_API_KEY")
 if not api_key:
@@ -135,7 +135,7 @@ def build_user_content(request: "QuizRequest", topics_string: str, excluded_stri
     Focus STRICTLY on the 'Allowed Topics' listed above -- the "topic" field of every
     question must be chosen only from that list.
     Do NOT generate questions on any concept listed in 'Already-Covered Concepts'; pick
-    different concepts entirely, even if they are less obvious.
+    different concepts entirely.
     """
 
 
