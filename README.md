@@ -107,14 +107,12 @@ From Swagger UI, you can:
 ```json
 {
   "category": "Computer Science",
-  "sub_category": "Algorithms",
+  "sub_category": "Data Structures",
   "difficulty": "Hard",
-  "language": "English",
-  "allowed_topics": [
-    "Dynamic Programming",
-    "Graph Traversal"
-  ],
-  "num_questions": 5
+  "language": "Arabic",
+  "allowed_topics": ["Trees", "Graphs", "Hash Tables"],
+  "num_questions": 5,
+  "excluded_concepts": ["Binary Search Tree Complexity", "Graph BFS"]
 }
 
 ```
@@ -135,7 +133,8 @@ From Swagger UI, you can:
       ],
       "correct_index": 1,
       "explanation": "Dijkstra's algorithm is a greedy algorithm that uses a priority queue to continuously find the shortest path from the source to all other nodes. It fails with negative edge weights.",
-      "topic": "Graph Traversal"
+      "topic": "Graph Traversal",
+      "concept_tag": "Hash Table Time Complexity"
     }
   ]
 }
